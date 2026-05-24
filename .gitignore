@@ -1,0 +1,58 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+.Python
+
+# ---- Virtual environments ----
+venv/
+.venv/
+env/
+ENV/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---- Project data (large / regeneratable) ----
+data/raw/
+data/processed/*.txt
+data/processed/*.jsonl
+*.parquet
+!data/processed/.gitkeep
+
+# ---- Model artifacts / training output ----
+checkpoints/
+runs/
+wandb/
+mlruns/
+*.bin
+*.safetensors
+*.pt
+*.ckpt
+
+# ---- HuggingFace cache (if it lands in repo) ----
+.cache/
+.huggingface/
+
+# ---- IDE / editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Secrets ----
+.env
+.env.*
+!.env.example
+*.key
+*.pem

@@ -1,0 +1,35 @@
+# TauraBot — Shona NLP project
+# Pinned for compatibility with Intel macOS (PyTorch dropped x86_64 wheels after 2.2)
+# AND Google Colab (Linux, Python 3.11). Install: pip install -r requirements.txt
+
+# ---- Phase 1: data collection & cleaning ----
+requests>=2.31,<3.0       # HTTP downloads (Bible, BBC Shona scraping)
+beautifulsoup4>=4.12      # HTML parsing for BBC + Bible sites
+lxml>=4.9                 # Fast parser backend for bs4 + wikiextractor
+pandas>=2.0,<3.0          # Stable 2.x series (3.x is brand new, breaks downstream)
+numpy>=1.24,<2.0          # Must stay <2.0 — torch 2.2.x was built against NumPy 1.x
+tqdm>=4.66                # Progress bars
+langdetect>=1.0.9         # Language ID for filtering non-Shona sentences
+wikiextractor>=3.0.6      # Parses Wikipedia XML dumps into plain text
+pyyaml>=6.0               # Config file loading
+unidecode>=1.3.7          # Normalization edge cases
+
+# ---- Phase 2 & 3: modeling (HuggingFace + PyTorch) ----
+transformers>=4.40,<5.0   # 5.x requires torch>=2.4 (unavailable on Intel Mac)
+torch>=2.2,<2.3           # Last version with x86_64 macOS wheels
+accelerate>=0.30,<1.0     # Mixed precision + Trainer integration
+sentencepiece>=0.1.99     # Required by mT5/T5 tokenizers
+protobuf>=3.20,<5.0       # sentencepiece dep
+huggingface_hub>=0.24,<1.0  # 1.x has API changes that ripple through transformers 4.x
+datasets>=2.18,<3.0       # 4.x is new; 2.x is what tutorials use
+evaluate>=0.4             # Perplexity + qualitative metric helpers
+
+# ---- Phase 3: corpus stats & visualization ----
+matplotlib>=3.7,<4.0      # Sentence-length histograms, freq plots
+
+# ---- Phase 4: chatbot UI ----
+gradio>=4.36,<5.0         # ChatInterface; HF Spaces compatible
+
+# ---- Dev / notebooks ----
+jupyter>=1.0
+ipykernel>=6.25

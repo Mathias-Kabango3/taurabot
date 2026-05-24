@@ -1,0 +1,43 @@
+# TauraBot configuration
+# Phase 2 & 3 model hyperparameters will be added when those phases begin.
+# Keep all tunables here — no hardcoded values in scripts.
+
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  conversations_dir: "data/conversations"
+  corpus_file: "data/processed/corpus.txt"
+
+# ---- Phase 1: data cleaning thresholds ----
+cleaning:
+  min_words_per_sentence: 5         # Drop sentences shorter than this
+  max_non_shona_char_ratio: 0.30    # Drop sentences with >30% non-Shona chars
+  langdetect_target: "sn"           # ISO 639-1 for Shona
+  langdetect_min_confidence: 0.70   # Keep only if langdetect is confident
+  dedupe:
+    exact: true
+    near_duplicate_threshold: 0.85  # MinHash/Jaccard threshold (Phase 1 step ?)
+
+# ---- Phase 1: source-specific download settings ----
+sources:
+  bible:
+    url: "https://www.wordproject.org/bibles/sn/index.htm"  # placeholder — verify in next step
+    output: "data/raw/bible/"
+  shona_wikipedia:
+    dump_url: "https://dumps.wikimedia.org/shwiki/latest/shwiki-latest-pages-articles.xml.bz2"
+    output: "data/raw/wikipedia/"
+  opus:
+    corpora: ["JW300", "GlobalVoices"]
+    language: "sn"
+    output: "data/raw/opus/"
+  bbc_shona:
+    base_url: "https://www.bbc.com/shona"
+    output: "data/raw/bbc/"
+    request_delay_seconds: 1.5      # Be polite to the server
+  common_crawl:
+    language_code: "sn"
+    output: "data/raw/cc/"
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
