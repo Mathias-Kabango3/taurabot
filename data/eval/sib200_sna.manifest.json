@@ -1,0 +1,12 @@
+{
+  "name": "sib200_eval",
+  "repo": "Davlan/sib200",
+  "config": "sna_Latn",
+  "split": "train+validation+test",
+  "license": "CC BY-SA 4.0",
+  "held_out": true,
+  "n_rows": 1004,
+  "n_lines": 1004,
+  "n_chars": 146554,
+  "retrieved_utc": "2026-05-24T11:56:58.072481+00:00"
+}

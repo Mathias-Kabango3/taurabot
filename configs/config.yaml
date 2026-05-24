@@ -11,32 +11,124 @@ paths:
 # ---- Phase 1: data cleaning thresholds ----
 cleaning:
   min_words_per_sentence: 5         # Drop sentences shorter than this
-  max_non_shona_char_ratio: 0.30    # Drop sentences with >30% non-Shona chars
-  langdetect_target: "sn"           # ISO 639-1 for Shona
-  langdetect_min_confidence: 0.70   # Keep only if langdetect is confident
-  dedupe:
-    exact: true
-    near_duplicate_threshold: 0.85  # MinHash/Jaccard threshold (Phase 1 step ?)
+  max_non_shona_char_ratio: 0.30    # Drop sentences with >30% non-Latin/punct chars
+  # Min fraction of a sentence's words that must appear in the Shona vocabulary
+  # (built from the Bible — see ShonaLangDetector in src/data/cleaner.py).
+  # 0.20 separates real Shona (>=0.25) from Kinyarwanda/Swahili/Zulu (<=0.18).
+  # Don't use generic `langdetect` — it confuses Shona with other Bantu langs.
+  min_shona_lang_score: 0.20
+  exact_dedup: true
+  # Near-duplicate dedup via MinHash (datasketch) — TODO when CC-heavy sources
+  # produce too much redundancy. Threshold reference value:
+  # near_duplicate_threshold: 0.85
 
 # ---- Phase 1: source-specific download settings ----
 sources:
   bible:
-    url: "https://www.wordproject.org/bibles/sn/index.htm"  # placeholder — verify in next step
+    # eBible.org BDRSC — Biblica Bhaibheri Dzvene Rakasununguka MuChiShona Chanhasi 2017
+    # Full OT+NT, plain-text readaloud format (1 verse per line), CC BY-SA 4.0
+    name: "Biblica Bhaibheri Dzvene Rakasununguka MuChiShona Chanhasi 2017 (BDRSC)"
+    license: "CC BY-SA 4.0"
+    attribution: "© 2005, 2018 Biblica, Inc. — https://www.biblica.com"
+    zip_url: "https://eBible.org/Scriptures/sna_readaloud.zip"
+    details_url: "https://ebible.org/find/show.php?id=sna"
     output: "data/raw/bible/"
-  shona_wikipedia:
-    dump_url: "https://dumps.wikimedia.org/shwiki/latest/shwiki-latest-pages-articles.xml.bz2"
-    output: "data/raw/wikipedia/"
-  opus:
-    corpora: ["JW300", "GlobalVoices"]
+    verses_file: "data/raw/bible/bible_verses.txt"
+  # ---- HuggingFace-hosted sources (loaded via `datasets` library) ----
+  # Each entry: repo, config, split, text_field (or extractor key), license, output.
+  # The `tier` field groups sources by download cost:
+  #   small  — < 100 MB, safe to pull in one shot
+  #   medium — 100–500 MB
+  #   large  — > 500 MB, gate separately
+
+  wikipedia:
+    repo: "wikimedia/wikipedia"
+    config: "20231101.sn"
+    split: "train"
+    text_field: "text"
+    license: "CC BY-SA 3.0"
+    tier: "small"
+    output: "data/raw/wikipedia/wiki_text.txt"
+
+  masakhane_ner:
+    repo: "masakhane/masakhaner2"
+    config: "sna"
+    split: "train+validation+test"
+    text_field: "tokens"          # list[str]; joiner inserts spaces
+    license: "AFL-3.0"
+    tier: "small"
+    output: "data/raw/masakhane/ner_text.txt"
+
+  masakhane_news:
+    repo: "masakhane/masakhanews"
+    config: "sna"
+    split: "train+validation+test"
+    text_field: ["headline", "text"]   # concat with newline
+    license: "AFL-3.0"
+    tier: "small"
+    output: "data/raw/masakhane/news_text.txt"
+
+  # flores_eval: GATED on HuggingFace as of 2026-05-24 (requires manual access
+  # request at https://huggingface.co/datasets/openlanguagedata/flores_plus).
+  # SIB-200 below already serves as the held-out eval set under CC BY-SA 4.0,
+  # so FLORES is optional. Re-enable this block once access is granted.
+  # flores_eval:
+  #   repo: "openlanguagedata/flores_plus"
+  #   config: "sna_Latn"
+  #   split: "dev+devtest"
+  #   text_field: "text"
+  #   license: "CC BY-SA 4.0"
+  #   tier: "small"
+  #   output: "data/eval/flores_sna.txt"
+  #   held_out: true
+
+  sib200_eval:
+    # HELD-OUT EVAL ONLY
+    repo: "Davlan/sib200"
+    config: "sna_Latn"
+    split: "train+validation+test"
+    text_field: "text"
+    license: "CC BY-SA 4.0"
+    tier: "small"
+    output: "data/eval/sib200_sna.txt"
+    held_out: true
+
+  # ---- Large web crawls (gate separately due to disk + bandwidth) ----
+  # mc4 (allenai/c4 cfg=sn) was REMOVED on 2026-05-24: native Shona speaker
+  # confirmed the "sn" config in mC4 is actually Kinyarwanda (Google's lang ID
+  # confuses the two Bantu languages — known mC4 issue). GlotCC + HPLT use the
+  # unambiguous ISO 639-3 code `sna_Latn`, so they are unaffected.
+
+  glotcc:
+    repo: "cis-lmu/GlotCC-V1"
+    config: "sna-Latn"
+    split: "train"
+    text_field: "content"
+    license: "CC0-1.0"
+    tier: "large"
+    output: "data/raw/glotcc/glotcc_text.txt"
+    streaming: true
+
+  hplt:
+    repo: "HPLT/HPLT2.0_cleaned"
+    config: "sna_Latn"
+    split: "train"
+    text_field: "text"
+    license: "CC0-1.0"
+    tier: "large"
+    output: "data/raw/hplt/hplt_text.txt"
+    streaming: true
+
+  # ---- Non-HF sources (OPUS) ----
+  # JW300 was removed from OPUS at JW's request — URLs return 404 since ~2024.
+  # NLLB (Facebook's No Language Left Behind) is the substantive replacement.
+  nllb:
+    corpus: "NLLB"
+    version: "v1"
     language: "sn"
-    output: "data/raw/opus/"
-  bbc_shona:
-    base_url: "https://www.bbc.com/shona"
-    output: "data/raw/bbc/"
-    request_delay_seconds: 1.5      # Be polite to the server
-  common_crawl:
-    language_code: "sn"
-    output: "data/raw/cc/"
+    license: "CC-BY-SA-4.0"
+    tier: "medium"
+    output: "data/raw/opus/nllb_sn.txt"
 
 logging:
   level: "INFO"

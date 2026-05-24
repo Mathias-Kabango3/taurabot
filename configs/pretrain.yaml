@@ -1,0 +1,37 @@
+# Phase 2: Continued Pretraining of mT5-small on the Shona corpus.
+# All values picked to fit Google Colab free tier (T4 GPU, ~12-hour session).
+
+model:
+  base_model: "google/mt5-small"        # 300 MB, fits T4 in fp16
+  push_to_hub: false                    # set true + hub_model_id when ready
+  hub_model_id: ""                      # e.g. "[username]/shona-mt5-small"
+
+data:
+  corpus_path: "data/processed/corpus.txt"   # one cleaned Shona sentence per line
+  cache_dir: "data/processed/tokenized_cache"  # HF datasets caches tokenized text here
+  max_seq_length: 128                   # input length (also influences span lengths)
+  validation_fraction: 0.005            # ~17K sentences held out for eval loss
+
+training:
+  output_dir: "checkpoints/shona-mt5-small"
+  per_device_batch_size: 8              # T4-safe with fp16 + grad checkpointing
+  gradient_accumulation_steps: 4        # effective batch size = 32
+  learning_rate: 5.0e-4
+  warmup_steps: 500                     # linear warmup over first 5% of training
+  max_steps: 10000                      # ~2-3 hours on T4 at these settings
+  save_steps: 1000                      # checkpoint every 1k steps to survive resets
+  save_total_limit: 3                   # keep only the last 3 checkpoints
+  logging_steps: 50
+  eval_steps: 500
+  fp16: true                            # mixed precision (T4 supports it)
+  gradient_checkpointing: true          # recompute activations to save VRAM
+  weight_decay: 0.01
+  seed: 42
+
+# Span corruption (T5/mT5's native pretraining objective)
+#   - mask `mlm_probability` of tokens
+#   - mean span length `mean_span_length`
+#   - replaced with mT5's <extra_id_*> sentinels
+mlm:
+  mlm_probability: 0.15
+  mean_span_length: 3.0

@@ -56,3 +56,7 @@ Thumbs.db
 !.env.example
 *.key
 *.pem
+
+# ---- Kaggle upload bundles (build artifacts, not source) ----
+taurabot-code.tar.gz
+*.tar.gz

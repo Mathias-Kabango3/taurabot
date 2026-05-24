@@ -1,0 +1,84 @@
+{
+  "out_path": "/Users/apple/Desktop/taurabot/data/processed/corpus.txt",
+  "config": {
+    "min_words_per_sentence": 5,
+    "max_non_shona_char_ratio": 0.3,
+    "min_shona_lang_score": 0.2,
+    "exact_dedup": true
+  },
+  "total_sentences": 3560434,
+  "total_chars": 377982232,
+  "per_source": [
+    {
+      "source": "bible",
+      "raw_lines": 31103,
+      "after_length": 38525,
+      "after_char_ratio": 38525,
+      "after_lang_id": 38525,
+      "after_dedup": 38308,
+      "sentences_kept": 38308,
+      "chars_kept": 3784477
+    },
+    {
+      "source": "wikipedia",
+      "raw_lines": 115575,
+      "after_length": 87454,
+      "after_char_ratio": 87429,
+      "after_lang_id": 71008,
+      "after_dedup": 58210,
+      "sentences_kept": 58210,
+      "chars_kept": 4678938
+    },
+    {
+      "source": "masakhane_ner",
+      "raw_lines": 8867,
+      "after_length": 8756,
+      "after_char_ratio": 8756,
+      "after_lang_id": 8558,
+      "after_dedup": 8555,
+      "sentences_kept": 8555,
+      "chars_kept": 1440105
+    },
+    {
+      "source": "masakhane_news",
+      "raw_lines": 3684,
+      "after_length": 21796,
+      "after_char_ratio": 21796,
+      "after_lang_id": 20252,
+      "after_dedup": 20164,
+      "sentences_kept": 20164,
+      "chars_kept": 3574568
+    },
+    {
+      "source": "glotcc",
+      "raw_lines": 298401,
+      "after_length": 253563,
+      "after_char_ratio": 253358,
+      "after_lang_id": 230628,
+      "after_dedup": 150149,
+      "sentences_kept": 150149,
+      "chars_kept": 20997705
+    },
+    {
+      "source": "hplt",
+      "raw_lines": 1201596,
+      "after_length": 1568101,
+      "after_char_ratio": 1567918,
+      "after_lang_id": 1475593,
+      "after_dedup": 1096968,
+      "sentences_kept": 1096968,
+      "chars_kept": 133931935
+    },
+    {
+      "source": "nllb",
+      "raw_lines": 4269478,
+      "after_length": 2975300,
+      "after_char_ratio": 2975238,
+      "after_lang_id": 2566777,
+      "after_dedup": 2188080,
+      "sentences_kept": 2188080,
+      "chars_kept": 209574504
+    }
+  ],
+  "completed_utc": "2026-05-24T12:38:58.123071+00:00"
+}
