@@ -369,6 +369,11 @@ def main(cfg: PretrainConfig) -> None:
         batched=True,
         batch_size=1000,
         num_proc=2,
+        # group_texts returns a different row count than its input (1000 docs
+        # → ~227 fixed-length chunks). Without remove_columns, the stale
+        # attention_mask column from the previous .map step keeps its old
+        # length and PyArrow refuses to build a table with mismatched columns.
+        remove_columns=tokenized["train"].column_names,
         desc="Grouping",
     )
     logger.info("Chunked dataset: %s", chunked)
@@ -416,8 +421,9 @@ def main(cfg: PretrainConfig) -> None:
         hub_model_id=cfg.hub_model_id or None,
         seed=cfg.seed,
         report_to=["tensorboard"],
-        # T5 outputs are seq2seq — Trainer needs to know
-        predict_with_generate=False,        # we only need loss for pretraining
+        # Note: `predict_with_generate` is a Seq2SeqTrainingArguments-only flag.
+        # For span-corruption pretraining we only need eval loss (not generated
+        # outputs), so the plain Trainer + TrainingArguments are correct here.
     )
 
     trainer = Trainer(
@@ -470,15 +476,20 @@ def _build_parser() -> argparse.ArgumentParser:
 def _cli(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     cfg = PretrainConfig.from_yaml(args.config) if Path(args.config).exists() else PretrainConfig()
-    # Apply CLI overrides — preserve dataclass field types
+    # Apply CLI overrides — coerce strings to the field's actual type by looking
+    # at type(default). field_def.type is a string forward-reference under
+    # `from __future__ import annotations` so we can't rely on it directly.
     for field_name, field_def in PretrainConfig.__dataclass_fields__.items():
         val = getattr(args, field_name, None)
         if val is None:
             continue
-        if isinstance(val, str):
-            field_type = field_def.type if isinstance(field_def.type, type) else str
+        default = field_def.default
+        if isinstance(val, str) and default is not None and not isinstance(default, str):
             try:
-                val = field_type(val)
+                if isinstance(default, bool):
+                    val = val.lower() in ("true", "1", "yes")
+                else:
+                    val = type(default)(val)
             except Exception:
                 pass
         setattr(cfg, field_name, val)

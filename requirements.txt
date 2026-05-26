@@ -17,7 +17,7 @@ unidecode>=1.3.7          # Normalization edge cases
 # ---- Phase 2 & 3: modeling (HuggingFace + PyTorch) ----
 transformers>=4.40,<5.0   # 5.x requires torch>=2.4 (unavailable on Intel Mac)
 torch>=2.2,<2.3           # Last version with x86_64 macOS wheels
-accelerate>=0.30,<1.0     # Mixed precision + Trainer integration
+accelerate>=1.0,<2.0      # Mixed precision + Trainer integration (need >=1.0 for keep_torch_compile)
 sentencepiece>=0.1.99     # Required by mT5/T5 tokenizers
 protobuf>=3.20,<5.0       # sentencepiece dep
 huggingface_hub>=0.24,<1.0  # 1.x has API changes that ripple through transformers 4.x
@@ -28,7 +28,7 @@ evaluate>=0.4             # Perplexity + qualitative metric helpers
 matplotlib>=3.7,<4.0      # Sentence-length histograms, freq plots
 
 # ---- Phase 4: chatbot UI ----
-gradio>=4.36,<5.0         # ChatInterface; HF Spaces compatible
+gradio>=5.0,<6.0          # Updated to 5.x for Jinja2 compatibility; ChatInterface works great
 
 # ---- Dev / notebooks ----
 jupyter>=1.0
